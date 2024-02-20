@@ -1,10 +1,10 @@
-from flask import Flask,render_template
+from flask import Flask, render_template, redirect, url_for
 
-app = Flask(__name__) #creating flask app name
+app = Flask(__name__)  # Création de l'application Flask
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return redirect(url_for('resume_1'))
 
 @app.route('/resume_1')
 def resume_1():
@@ -18,5 +18,5 @@ def resume_2():
 def resume_template():
     return render_template("resume_template.html")
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
     app.run()
