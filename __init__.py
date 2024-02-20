@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)  # Création de l'application Flask
 
@@ -6,17 +6,26 @@ app = Flask(__name__)  # Création de l'application Flask
 def home():
     return render_template("resume_1.html")
 
-@app.route('/resume_1')
-def resume_1():
-    return render_template("resume_1.html")
-
-@app.route('/resume_2')
-def resume_2():
-    return render_template("resume_2.html")
-
-@app.route('/resume_template')
-def resume_template():
-    return render_template("resume_template.html")
+@app.route('/update_resume', methods=['POST'])
+def update_resume():
+    if request.method == 'POST':
+        # Récupérer les données du formulaire
+        name = request.form['name']
+        dob = request.form['dob']
+        email = request.form['email']
+        # Récupérer d'autres champs de formulaire de la même manière
+        
+        # Mettre à jour les données dans votre application (par exemple, dans une base de données)
+        # Ici, nous ne faisons que renvoyer les données pour l'exemple
+        updated_data = {
+            'name': name,
+            'dob': dob,
+            'email': email,
+            # Ajouter d'autres champs mis à jour de la même manière
+        }
+        
+        # Rediriger vers la page d'accueil avec un message de confirmation ou afficher un message sur la page
+        return render_template("resume_1.html", updated_data=updated_data)
 
 if __name__ == "__main__":
     app.run()
