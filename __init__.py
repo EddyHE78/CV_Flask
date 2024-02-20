@@ -1,10 +1,10 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template
 
 app = Flask(__name__)  # Création de l'application Flask
 
 @app.route('/')
 def home():
-    return redirect(url_for('resume_1'))  # Redirection vers la page resume_1.html
+    return render_template("resume_1.html")
 
 @app.route('/resume_1')
 def resume_1():
