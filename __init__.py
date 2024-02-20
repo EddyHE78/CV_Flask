@@ -24,7 +24,7 @@ def resume_template():
 # Création d'une nouvelle route pour la lecture de la BDD
 @app.route("/consultation/")
 def ReadBDD():
-    conn = sqlite3.connect('/home/EddyHE78/database.db')
+    conn = sqlite3.connect('/home/eddyhe/database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients;')
     data = cursor.fetchall()
@@ -38,7 +38,7 @@ def ReadBDD():
 
 @app.route('/fiche_client/<int:post_id>')
 def Readfiche(post_id):
-    conn = sqlite3.connect('/home/EddyHE78/database.db')
+    conn = sqlite3.connect('/home/eddyhe/database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients WHERE id = ?', (post_id,))
     data = cursor.fetchall()
@@ -49,7 +49,7 @@ def Readfiche(post_id):
 
 @app.route('/fiche_clientn/<string:nom>')
 def Readfichenom(nom):
-    conn = sqlite3.connect('/home/EddyHE78/database.db')
+    conn = sqlite3.connect('/home/eddyhe/database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients WHERE nom LIKE ?', (nom,))
     data = cursor.fetchall()
@@ -64,7 +64,7 @@ def Searchfiche():
     # nom = input("Nom client a chercher: ");
     if request.method == 'POST':
         nom = request.form['nom']
-        conn = sqlite3.connect('/home/EddyHE78/database.db')
+        conn = sqlite3.connect('/home/eddyhe/database.db')
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM clients WHERE nom = ?', (nom,))
         data = cursor.fetchall()
