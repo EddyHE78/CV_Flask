@@ -1,40 +1,56 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template_string, render_template, jsonify, url_for
+from flask import Flask, render_template, request, redirect
+from flask import json
+from urllib.request import urlopen
 import sqlite3
+import traceback
 
-app = Flask(__name__)
+app = Flask(__name__) #creating flask app name
 
 @app.route('/')
 def home():
     return render_template("index.html")
+    
+@app.route('/messages', methods=['GET', 'POST'])
+def messages():
+    try:
+        if request.method == 'POST':
+            # Récupérer les données du formulaire
+            email = request.form['email']
+            message = request.form['message']
 
-@app.route('/resume_1')
-def resume_1():
-    return render_template("resume_1.html")
+            # Insérer les données dans la base de données
+            with sqlite3.connect('/home/eddyhe/database.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute('INSERT INTO clients (email, message) VALUES (?, ?)', (email, message))
+                conn.commit()
 
-@app.route('/resume_2')
-def resume_2():
-    return render_template("resume_2.html")
+            # Rediriger vers la page de consultation des messages après l'ajout
+            return redirect(url_for('ReadBDD'))
 
-@app.route('/resume_template')
-def resume_template():
-    return render_template("resume_template.html")
+        # Si la méthode est GET, simplement rendre le template du formulaire
+        return render_template('messages.html')
 
-# Route pour la consultation des données dans la base de données
+    except Exception as e:
+        print("Une erreur s'est produite : ", str(e))
+        print(traceback.format_exc())
+        return str(e), 500
+
+# Création d'une nouvelle route pour la lecture de la BDD
 @app.route("/consultation/")
 def ReadBDD():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('/home/eddyhe/database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients;')
     data = cursor.fetchall()
     conn.close()
     
     # Rendre le template HTML et transmettre les données
-    return render_template('read_data.html', data=data)
+    return render_template('read_data.html', data=data) 
 
-# Routes pour la consultation des fiches clients individuelles
 @app.route('/fiche_client/<int:post_id>')
 def Readfiche(post_id):
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('/home/eddyhe/database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients WHERE id = ?', (post_id,))
     data = cursor.fetchall()
@@ -45,7 +61,7 @@ def Readfiche(post_id):
 
 @app.route('/fiche_clientn/<string:nom>')
 def Readfichenom(nom):
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('/home/eddy/database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients WHERE nom LIKE ?', (nom,))
     data = cursor.fetchall()
@@ -54,12 +70,13 @@ def Readfichenom(nom):
     # Rendre le template HTML et transmettre les données
     return render_template('read_data.html', data=data)
 
-# Route pour la recherche d'un client par nom
 @app.route('/search_client', methods=['GET', 'POST'])
 def Searchfiche():
+
+    # nom = input("Nom client a chercher: ");
     if request.method == 'POST':
         nom = request.form['nom']
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('/home/eddyhe/database.db')
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM clients WHERE nom = ?', (nom,))
         data = cursor.fetchall()
@@ -71,7 +88,6 @@ def Searchfiche():
     else:     
        return "Method not allowed for..."
 
-# Route pour l'ajout d'un nouveau client
 @app.route('/ajouter_client/', methods=['GET', 'POST'])
 def ajouter_client():
     if request.method == 'POST':
@@ -79,16 +95,18 @@ def ajouter_client():
         nom = request.form['nom']
         prenom = request.form['prenom']
         adresse = request.form['adresse']
-
-        # Insérer les données dans la base de données (ici, je suppose que tu as une table 'clients')
-        conn = sqlite3.connect('database.db')
+        
+        conn = sqlite3.connect('/home/eddyhe/database.db')
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO clients (nom, prenom, adresse) VALUES (?, ?, ?)', (nom, prenom, adresse))
-        conn.commit()
-        conn.close()
+        if conn is not None:
+            cursor.execute('INSERT INTO clients (email, message) VALUES (?, ?)', (email, message))
+            conn.commit()
+            conn.close()
+        else:
+            return 'Erreur de connexion à la base de données'
 
         # Rediriger vers la page de consultation des clients après l'ajout
-        return redirect(url_for('ReadBDD'))
+        return redirect(url_for('/'))
 
     # Si la méthode est GET, simplement rendre le template du formulaire
     return render_template('create_data.html')
@@ -101,7 +119,7 @@ def est_authentifie():
 
 @app.route('/post/<int:post_id>')
 def get_post(post_id):
-    conn = sqlite3.connect('database.db')
+    conn = get_db_connection()
     post = conn.execute('SELECT * FROM livres WHERE id = ?', (post_id,)).fetchone()
     conn.close()
 
@@ -114,11 +132,6 @@ def get_post(post_id):
     
     # Renvoie la réponse JSON
     return jsonify(post=json_post)
-
-# Route pour afficher le formulaire de contact
-@app.route('/contact')
-def contact_form():
-    return render_template('contact.html')
 
 if(__name__ == "__main__"):
     app.run()
