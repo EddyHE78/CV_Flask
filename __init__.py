@@ -19,7 +19,7 @@ def resume_2():
 def resume_template():
     return render_template("resume_template.html")
 
-# Création d'une nouvelle route pour la lecture de la BDD
+# Route pour la consultation des données dans la base de données
 @app.route("/consultation/")
 def ReadBDD():
     conn = sqlite3.connect('database.db')
@@ -31,6 +31,7 @@ def ReadBDD():
     # Rendre le template HTML et transmettre les données
     return render_template('read_data.html', data=data)
 
+# Routes pour la consultation des fiches clients individuelles
 @app.route('/fiche_client/<int:post_id>')
 def Readfiche(post_id):
     conn = sqlite3.connect('database.db')
@@ -53,6 +54,7 @@ def Readfichenom(nom):
     # Rendre le template HTML et transmettre les données
     return render_template('read_data.html', data=data)
 
+# Route pour la recherche d'un client par nom
 @app.route('/search_client', methods=['GET', 'POST'])
 def Searchfiche():
     if request.method == 'POST':
@@ -69,6 +71,7 @@ def Searchfiche():
     else:     
        return "Method not allowed for..."
 
+# Route pour l'ajout d'un nouveau client
 @app.route('/ajouter_client/', methods=['GET', 'POST'])
 def ajouter_client():
     if request.method == 'POST':
