@@ -1,10 +1,7 @@
-from flask import Flask, render_template_string, render_template, jsonify
-from flask import Flask, render_template, request, redirect
-from flask import json
-from urllib.request import urlopen
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 
-app = Flask(__name__) #creating flask app name
+app = Flask(__name__)
 
 @app.route('/')
 def home():
@@ -21,6 +18,7 @@ def resume_2():
 @app.route('/resume_template')
 def resume_template():
     return render_template("resume_template.html")
+
 # Création d'une nouvelle route pour la lecture de la BDD
 @app.route("/consultation/")
 def ReadBDD():
@@ -31,14 +29,11 @@ def ReadBDD():
     conn.close()
     
     # Rendre le template HTML et transmettre les données
-    return render_template('read_data.html', data=data) 
-
-
-
+    return render_template('read_data.html', data=data)
 
 @app.route('/fiche_client/<int:post_id>')
 def Readfiche(post_id):
-    conn = sqlite3.connect('./www/database.db')
+    conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM clients WHERE id = ?', (post_id,))
     data = cursor.fetchall()
@@ -60,8 +55,6 @@ def Readfichenom(nom):
 
 @app.route('/search_client', methods=['GET', 'POST'])
 def Searchfiche():
-
-    # nom = input("Nom client a chercher: ");
     if request.method == 'POST':
         nom = request.form['nom']
         conn = sqlite3.connect('database.db')
@@ -85,17 +78,14 @@ def ajouter_client():
         adresse = request.form['adresse']
 
         # Insérer les données dans la base de données (ici, je suppose que tu as une table 'clients')
-        conn = sqlite3.connect('./www/database.db')
+        conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
-        if conn is not None:
-            cursor.execute('INSERT INTO clients (nom, prenom, adresse) VALUES (?, ?, ?)', (nom, prenom, adresse))
-            conn.commit()
-            conn.close()
-        else:
-            return 'Erreur de connexion à la base de données'
+        cursor.execute('INSERT INTO clients (nom, prenom, adresse) VALUES (?, ?, ?)', (nom, prenom, adresse))
+        conn.commit()
+        conn.close()
 
         # Rediriger vers la page de consultation des clients après l'ajout
-        return redirect(url_for('/'))
+        return redirect(url_for('ReadBDD'))
 
     # Si la méthode est GET, simplement rendre le template du formulaire
     return render_template('create_data.html')
@@ -108,7 +98,7 @@ def est_authentifie():
 
 @app.route('/post/<int:post_id>')
 def get_post(post_id):
-    conn = get_db_connection()
+    conn = sqlite3.connect('database.db')
     post = conn.execute('SELECT * FROM livres WHERE id = ?', (post_id,)).fetchone()
     conn.close()
 
